@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Phone, Video, MoreVertical } from "lucide-react";
+import { Send, Phone, Video, MoreVertical, Paperclip, Mic, Search, Smile, MicOff } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { EmojiPicker } from "./EmojiPicker";
+import { FileUpload } from "./FileUpload";
 
 interface Message {
   id: string;
@@ -12,6 +14,10 @@ interface Message {
   timestamp: string;
   isOwn: boolean;
   status?: 'sent' | 'delivered' | 'read';
+  type?: 'text' | 'image' | 'file' | 'voice';
+  fileUrl?: string;
+  fileName?: string;
+  reactions?: { emoji: string; count: number; users: string[] }[];
 }
 
 interface Conversation {
@@ -24,11 +30,31 @@ interface Conversation {
 interface ChatAreaProps {
   conversation?: Conversation;
   messages: Message[];
-  onSendMessage: (content: string) => void;
+  onSendMessage: (content: string, type?: string, file?: File) => void;
+  onSearchMessages?: (query: string) => void;
+  isTyping?: boolean;
+  isRecording?: boolean;
+  onStartRecording?: () => void;
+  onStopRecording?: () => void;
+  onAddReaction?: (messageId: string, emoji: string) => void;
 }
 
-export function ChatArea({ conversation, messages, onSendMessage }: ChatAreaProps) {
+export function ChatArea({ 
+  conversation, 
+  messages, 
+  onSendMessage,
+  onSearchMessages,
+  isTyping = false,
+  isRecording = false,
+  onStartRecording,
+  onStopRecording,
+  onAddReaction
+}: ChatAreaProps) {
   const [messageInput, setMessageInput] = useState("");
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showFileUpload, setShowFileUpload] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showSearch, setShowSearch] = useState(false);
 
   const handleSendMessage = () => {
     if (messageInput.trim()) {
@@ -41,6 +67,22 @@ export function ChatArea({ conversation, messages, onSendMessage }: ChatAreaProp
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
+    }
+  };
+
+  const handleEmojiSelect = (emoji: string) => {
+    setMessageInput(prev => prev + emoji);
+    setShowEmojiPicker(false);
+  };
+
+  const handleFileUpload = (file: File) => {
+    onSendMessage(`Fichier envoyé: ${file.name}`, 'file', file);
+    setShowFileUpload(false);
+  };
+
+  const handleAddReaction = (messageId: string, emoji: string) => {
+    if (onAddReaction) {
+      onAddReaction(messageId, emoji);
     }
   };
 
@@ -85,6 +127,13 @@ export function ChatArea({ conversation, messages, onSendMessage }: ChatAreaProp
         </div>
         
         <div className="flex items-center space-x-2">
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={() => setShowSearch(!showSearch)}
+          >
+            <Search className="h-5 w-5" />
+          </Button>
           <Button variant="ghost" size="icon">
             <Phone className="h-5 w-5" />
           </Button>
@@ -96,6 +145,21 @@ export function ChatArea({ conversation, messages, onSendMessage }: ChatAreaProp
           </Button>
         </div>
       </div>
+
+      {/* Search Bar */}
+      {showSearch && (
+        <div className="p-4 border-b border-border bg-card">
+          <Input
+            placeholder="Rechercher dans la conversation..."
+            value={searchQuery}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              onSearchMessages?.(e.target.value);
+            }}
+            className="w-full"
+          />
+        </div>
+      )}
 
       {/* Messages */}
       <ScrollArea className="flex-1 p-4">
@@ -110,13 +174,46 @@ export function ChatArea({ conversation, messages, onSendMessage }: ChatAreaProp
             >
               <div
                 className={cn(
-                  "max-w-[70%] rounded-lg px-4 py-2 break-words",
+                  "max-w-[70%] rounded-lg px-4 py-2 break-words group relative",
                   message.isOwn
                     ? "bg-green-600 text-white rounded-br-sm"
                     : "bg-muted text-foreground rounded-bl-sm"
                 )}
+                onDoubleClick={() => handleAddReaction(message.id, "❤️")}
               >
+                {message.type === 'image' && message.fileUrl && (
+                  <img 
+                    src={message.fileUrl} 
+                    alt="Image partagée" 
+                    className="max-w-full h-auto rounded mb-2"
+                  />
+                )}
+                
+                {message.type === 'file' && (
+                  <div className="flex items-center space-x-2 mb-2 p-2 bg-black/10 rounded">
+                    <Paperclip className="h-4 w-4" />
+                    <span className="text-sm">{message.fileName || 'Fichier'}</span>
+                  </div>
+                )}
+
                 <p className="text-sm">{message.content}</p>
+                
+                {/* Reactions */}
+                {message.reactions && message.reactions.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-2">
+                    {message.reactions.map((reaction, index) => (
+                      <button
+                        key={index}
+                        className="flex items-center space-x-1 bg-black/10 rounded-full px-2 py-1 text-xs hover:bg-black/20"
+                        onClick={() => handleAddReaction(message.id, reaction.emoji)}
+                      >
+                        <span>{reaction.emoji}</span>
+                        <span>{reaction.count}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
                 <div className={cn(
                   "flex items-center justify-end mt-1 space-x-1",
                   message.isOwn ? "text-green-100" : "text-muted-foreground"
@@ -130,6 +227,21 @@ export function ChatArea({ conversation, messages, onSendMessage }: ChatAreaProp
                     </div>
                   )}
                 </div>
+
+                {/* Quick reaction on hover */}
+                <div className="absolute -top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex space-x-1 bg-background border rounded-full p-1 shadow-lg">
+                    {['❤️', '👍', '😊', '😂', '😮', '😢'].map(emoji => (
+                      <button
+                        key={emoji}
+                        onClick={() => handleAddReaction(message.id, emoji)}
+                        className="hover:scale-110 transition-transform p-1"
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           ))}
@@ -139,13 +251,46 @@ export function ChatArea({ conversation, messages, onSendMessage }: ChatAreaProp
       {/* Message Input */}
       <div className="p-4 border-t border-border bg-card">
         <div className="flex items-center space-x-2">
-          <Input
-            value={messageInput}
-            onChange={(e) => setMessageInput(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder="Tapez votre message..."
-            className="flex-1"
-          />
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={() => setShowFileUpload(!showFileUpload)}
+          >
+            <Paperclip className="h-4 w-4" />
+          </Button>
+          
+          <div className="flex-1 relative">
+            <Input
+              value={messageInput}
+              onChange={(e) => setMessageInput(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Tapez votre message..."
+              className="pr-10"
+            />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8"
+              onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+            >
+              <Smile className="h-4 w-4" />
+            </Button>
+          </div>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            onMouseDown={onStartRecording}
+            onMouseUp={onStopRecording}
+            onMouseLeave={onStopRecording}
+            className={cn(
+              "transition-colors",
+              isRecording ? "bg-red-500 text-white" : ""
+            )}
+          >
+            {isRecording ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+          </Button>
+          
           <Button 
             onClick={handleSendMessage}
             disabled={!messageInput.trim()}
@@ -154,6 +299,20 @@ export function ChatArea({ conversation, messages, onSendMessage }: ChatAreaProp
             <Send className="h-4 w-4" />
           </Button>
         </div>
+
+        {/* Emoji Picker */}
+        {showEmojiPicker && (
+          <div className="absolute bottom-20 right-4">
+            <EmojiPicker onSelect={handleEmojiSelect} onClose={() => setShowEmojiPicker(false)} />
+          </div>
+        )}
+
+        {/* File Upload */}
+        {showFileUpload && (
+          <div className="absolute bottom-20 left-4">
+            <FileUpload onUpload={handleFileUpload} onClose={() => setShowFileUpload(false)} />
+          </div>
+        )}
       </div>
     </div>
   );
