@@ -1,73 +1,69 @@
-# Welcome to your Lovable project
+# 💬 Bechir AI – Application de messagerie intelligente
 
-## Project info
+**Bechir AI** est une application de messagerie moderne, élégante et responsive, inspirée de WhatsApp. Elle intègre une interface intuitive de chat, des conversations en temps réel, et plusieurs assistants basés sur l’IA.
 
-**URL**: https://lovable.dev/projects/2e6c41fa-8a20-46ac-8603-a2d7ff36e079
+---
 
-## How can I edit this code?
+## 🚀 Fonctionnalités principales
 
-There are several ways of editing your application.
+- 🧑‍🤝‍🧑 Liste des conversations avec :
+  - Avatars des contacts
+  - Prévisualisation des derniers messages
+  - Statuts (en ligne, hors ligne)
+- 💬 Interface de chat en temps réel :
+  - Bulles de messages avec alignement clair
+  - Envoi instantané de messages
+  - Réponses automatiques générées par des assistants IA
+- 🧠 Assistants AI intégrés :
+  - Support Client
+  - Analyse de documents
+  - Réponses contextuelles intelligentes
+- 📱 Design responsive :
+  - Vue optimisée pour desktop et mobile
+  - Mode sombre / clair supporté
+- ✨ Expérience utilisateur :
+  - Animations fluides
+  - Transitions élégantes
+  - Interface moderne et épurée
 
-**Use Lovable**
+---
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/2e6c41fa-8a20-46ac-8603-a2d7ff36e079) and start prompting.
+## 🧰 Stack technique
 
-Changes made via Lovable will be committed automatically to this repo.
+- **React** + **TypeScript**
+- **Vite** (build ultra rapide)
+- **shadcn-ui** (UI design system)
+- **Tailwind CSS** (design rapide et responsive)
+- (Optionnel) **Socket.io** ou **Firebase** (messagerie en temps réel)
 
-**Use your preferred IDE**
+---
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 📦 Installation
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+```bash
+# 1. Cloner le projet
+git clone https://github.com/<TON_UTILISATEUR>/bechir-ai.git
 
-Follow these steps:
+# 2. Accéder au dossier
+cd bechir-ai
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# 3. Installer les dépendances
+npm install
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# 4. Lancer l'application
 npm run dev
-```
+🖼️ Aperçu
+✨ Design inspiré de WhatsApp avec une palette verte personnalisée
+💡 Interface divisée : sidebar à gauche, chat principal à droite
 
-**Edit a file directly in GitHub**
+🔮 À venir
+Notifications en temps réel 🔔
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+Partage de fichiers 📎
 
-**Use GitHub Codespaces**
+Authentification utilisateur 🔐
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+PWA (Progressive Web App) 📲
 
-## What technologies are used for this project?
+Chat vocal / vidéo 🎥
 
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/2e6c41fa-8a20-46ac-8603-a2d7ff36e079) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
